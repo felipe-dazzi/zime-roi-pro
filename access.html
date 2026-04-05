@@ -282,10 +282,11 @@
         if (error) {
             alert('Erro no cadastro: ' + error.message);
             btn.disabled = false;
-            btn.innerText = 'CONFORDAR E ASSINAR';
+            btn.innerText = 'CONCORDAR E ASSINAR';
         } else {
-            alert('Cadastro enviado! Agora você só precisa garantir o pagamento para liberar o acesso.');
-            window.location.href = 'index.html';
+            // URL oficial da Kiwify integrada
+            const CHECKOUT_URL = "https://pay.kiwify.com.br/PparN3T"; 
+            window.location.href = CHECKOUT_URL;
         }
     }
 </script>
