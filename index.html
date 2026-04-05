@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zime ROI PRO | Inteligência de Funil</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #040d21;
+            --card-bg: #0b1a38;
+            --card-border: #152c5b;
+            --accent-primary: #0088ff;
+            --accent-light: #e0f0ff;
+            --text-main: #ffffff;
+            --text-muted: #8ca3c4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gold: #d4a017;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* ========== HEADER ========== */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .pro-badge {
+            display: inline-block;
+            background: rgba(212, 160, 23, 0.15);
+            color: var(--gold);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(212, 160, 23, 0.35);
+        }
+
+        .app-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .app-subtitle {
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        /* ========== LAYOUT 2 COLUNAS ========== */
+        .layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+
+        .results-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ========== CARDS ========== */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-light);
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 15px;
+        }
+
+        /* ========== INPUTS ========== */
+        .step-label {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 25px 0 15px 0;
+            opacity: 0.9;
+        }
+
+        .step-label:first-of-type { margin-top: 0; }
+
+        .input-box {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .input-box label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 400;
+        }
+
+        .input-box .optional-tag {
+            font-size: 0.7rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-left: 6px;
+            opacity: 0.8;
+        }
+
+        .input-box input {
+            width: 100%;
+            background: #061126;
+            border: 1px solid #1c3666;
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+            transition: 0.2s ease;
+            min-height: 48px;
+        }
+
+        .input-box input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 136, 255, 0.1);
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        /* ========== KPI GRID ========== */
+        .kpi-hero {
+            background: #061126;
+            border-radius: 14px;
+            padding: 22px 24px;
+            border: 1px solid rgba(0, 136, 255, 0.3);
+            background: rgba(0, 136, 255, 0.05);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .kpi-hero .kpi-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+        .kpi-hero .kpi-value { font-size: 2.2rem; font-weight: 800; word-break: break-word; }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .kpi-card {
+            background: #061126;
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid #1c3666;
+        }
+
+        .kpi-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .kpi-value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        /* ========== FUNIL VISUAL ========== */
+        .funnel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .funnel-stage {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .funnel-bar-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .funnel-bar {
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 70px;
+        }
+
+        /* Cores distintas por etapa */
+        .funnel-bar.bar-impressions {
+            background: linear-gradient(135deg, rgba(0,136,255,0.25), rgba(0,180,255,0.15));
+            border: 1px solid rgba(0,136,255,0.4);
+        }
+        .funnel-bar.bar-clicks {
+            background: linear-gradient(135deg, rgba(0,210,200,0.25), rgba(0,230,180,0.15));
+            border: 1px solid rgba(0,210,200,0.4);
+        }
+        .funnel-bar.bar-pageviews {
+            background: linear-gradient(135deg, rgba(100,180,255,0.25), rgba(130,200,255,0.15));
+            border: 1px solid rgba(100,180,255,0.4);
+        }
+        .funnel-bar.bar-checkouts {
+            background: linear-gradient(135deg, rgba(140,80,255,0.25), rgba(180,100,255,0.15));
+            border: 1px solid rgba(140,80,255,0.4);
+        }
+        .funnel-bar.bar-sales {
+            background: linear-gradient(135deg, rgba(212,160,23,0.3), rgba(255,200,50,0.15));
+            border: 1px solid rgba(212,160,23,0.5);
+        }
+
+        .funnel-bar .funnel-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            white-space: nowrap;
+        }
+
+        .funnel-bar .funnel-count {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .funnel-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3px 0;
+        }
+
+        .funnel-arrow-line {
+            width: 2px;
+            height: 8px;
+            background: var(--card-border);
+        }
+
+        .funnel-rate-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .funnel-rate-badge.rate-success { color: var(--success); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+        .funnel-rate-badge.rate-warning { color: var(--warning); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.08); }
+        .funnel-rate-badge.rate-danger  { color: var(--danger); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.08); }
+
+        /* ========== ALERTAS ========== */
+        .alerts-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .alert-box {
+            display: flex;
+            align-items: flex-start;
+            padding: 20px;
+            border-radius: 12px;
+            background: #061126;
+            border-left: 4px solid var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .alert-content { min-width: 0; }
+
+        .alert-content h4 {
+            font-size: 0.95rem;
+            color: var(--accent-light);
+            margin-bottom: 5px;
+        }
+
+        .alert-content p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        .alert-content .metric-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.05);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .status-danger  { border-left-color: var(--danger);  background: rgba(239, 68, 68, 0.05); }
+        .status-warning { border-left-color: var(--warning); background: rgba(245, 158, 11, 0.05); }
+        .status-success { border-left-color: var(--success); background: rgba(16, 185, 129, 0.05); }
+
+        /* ========== VEREDITO ========== */
+        .scale-box {
+            margin-top: 0;
+            background: rgba(0, 136, 255, 0.1);
+            border: 1px solid rgba(0, 136, 255, 0.3);
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .scale-title {
+            font-size: 0.85rem;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .scale-message {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        /* ========== FOOTER ========== */
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        /* =============================================
+           RESPONSIVO — TABLET (até 768px)
+           ============================================= */
+        @media (max-width: 768px) {
+            body { padding: 25px 15px; }
+            .app-name { font-size: 2rem; }
+            .app-subtitle { font-size: 0.9rem; }
+            header { margin-bottom: 28px; }
+            .card { padding: 25px 20px; border-radius: 16px; }
+
+            .results-grid { grid-template-columns: repeat(2, 1fr); }
+            .kpi-hero .kpi-value { font-size: 1.8rem; }
+
+            .funnel-bar { height: 42px; }
+            .funnel-bar .funnel-label { font-size: 0.75rem; }
+            .funnel-bar .funnel-count { font-size: 0.9rem; }
+
+            .alert-box { padding: 16px; }
+            .alert-icon { font-size: 1.3rem; margin-right: 12px; }
+            .alert-content h4 { font-size: 0.88rem; }
+            .alert-content p { font-size: 0.85rem; }
+
+            .sim-results { grid-template-columns: repeat(3, 1fr); }
+            .scale-message { font-size: 1rem; }
+        }
+
+        /* =============================================
+           RESPONSIVO — MOBILE (até 480px)
+           ============================================= */
+        @media (max-width: 480px) {
+            body { padding: 16px 10px; }
+            .container { max-width: 100%; }
+            header { margin-bottom: 20px; }
+            .pro-badge { font-size: 0.65rem; padding: 5px 12px; }
+            .app-name { font-size: 1.6rem; }
+            .app-subtitle { font-size: 0.82rem; }
+
+            .layout { gap: 16px; }
+            .card {
+                padding: 20px 16px;
+                border-radius: 14px;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            }
+            .card-title { font-size: 1rem; margin-bottom: 18px; padding-bottom: 12px; }
+
+            .step-label { font-size: 0.72rem; margin: 20px 0 12px 0; }
+            .input-box { margin-bottom: 12px; }
+            .input-box label { font-size: 0.8rem; }
+            .input-box input { padding: 14px; font-size: 1rem; }
+
+            .kpi-hero { padding: 18px 16px; }
+            .kpi-hero .kpi-value { font-size: 1.6rem; }
+            .results-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .kpi-card { padding: 14px; border-radius: 10px; }
+            .kpi-title { font-size: 0.7rem; }
+            .kpi-value { font-size: 1.1rem; }
+
+            .funnel-bar { height: 38px; min-width: 60px; }
+            .funnel-bar .funnel-label { font-size: 0.68rem; }
+            .funnel-bar .funnel-count { font-size: 0.82rem; }
+            .funnel-rate-badge { font-size: 0.72rem; padding: 3px 10px; }
+
+            .alerts-wrapper { gap: 10px; }
+            .alert-box { padding: 14px 12px; border-radius: 10px; }
+            .alert-icon { font-size: 1.2rem; margin-right: 10px; }
+            .alert-content h4 {
+                font-size: 0.82rem;
+                display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+            }
+            .alert-content .metric-tag { margin-left: 0; font-size: 0.7rem; }
+            .alert-content p { font-size: 0.82rem; line-height: 1.45; }
+
+            .scale-box { padding: 18px 14px; border-radius: 10px; }
+            .scale-title { font-size: 0.75rem; }
+            .scale-message { font-size: 0.92rem; }
+
+            footer { margin-top: 35px; }
+        }
+
+        /* =============================================
+           RESPONSIVO — ULTRA-SMALL (até 360px)
+           ============================================= */
+        @media (max-width: 360px) {
+            body { padding: 12px 8px; }
+            .app-name { font-size: 1.4rem; }
+            .card { padding: 16px 12px; }
+            .results-grid { grid-template-columns: 1fr; }
+            .results-grid { grid-template-columns: 1fr; }
+            .funnel-bar { height: 34px; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="pro-badge">O SEGREDO DA ESCALA</div>
+        <h1 class="app-name">Zime ROI PRO</h1>
+        <p class="app-subtitle">Mapeamento de Funil</p>
+    </header>
+
+    <div class="layout">
+        
+        <!-- ========== COLUNA 1: DADOS DO FUNIL ========== -->
+        <div class="card input-card">
+            <h2 class="card-title">Preencha seu Funil</h2>
+            
+            <div class="step-label">1. Atração (Anúncios)</div>
+            <div class="input-box">
+                <label>Gasto Total (R$)</label>
+                <input type="number" id="spend" placeholder="Ex: 1000" step="0.01">
+            </div>
+            <div class="input-box">
+                <label>Pessoas Alcançadas (Impressões)</label>
+                <input type="number" id="impressions" placeholder="Ex: 50000">
+            </div>
+            <div class="input-box">
+                <label>Cliques no Anúncio</label>
+                <input type="number" id="clicks" placeholder="Ex: 400">
+            </div>
+
+            <div class="step-label">2. Conversão (Página/Checkout)</div>
+            <div class="input-box">
+                <label>Visualizações da Página (Page Views)</label>
+                <input type="number" id="pageviews" placeholder="Ex: 350">
+            </div>
+            <div class="input-box">
+                <label>Chegaram no Checkout</label>
+                <input type="number" id="checkouts" placeholder="Ex: 30">
+            </div>
+            <div class="input-box">
+                <label>Vendas Finalizadas</label>
+                <input type="number" id="sales" placeholder="Ex: 8">
+            </div>
+            
+            <div class="step-label">3. Produto</div>
+            <div class="input-box">
+                <label>Valor de Venda (Ticket Médio)</label>
+                <input type="number" id="ticket" placeholder="Ex: 297" step="0.01">
+            </div>
+            <div class="input-box">
+                <label>Taxa da Plataforma (%) <span class="optional-tag">OPCIONAL</span></label>
+                <input type="number" id="platform-fee" placeholder="Ex: 6.49" step="0.01" min="0" max="100">
+            </div>
+        </div>
+
+        <!-- ========== COLUNA 2: RESULTADOS ========== -->
+        <div class="results-column">
+
+            <!-- CARD: RESUMO FINANCEIRO -->
+            <div class="card">
+                <h2 class="card-title">Resumo Financeiro</h2>
+
+                <div class="kpi-hero">
+                    <div class="kpi-title">Lucro Líquido Real</div>
+                    <div class="kpi-value" id="val-profit">R$ 0,00</div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-title">Faturamento Bruto</div>
+                        <div class="kpi-value" id="val-revenue">R$ 0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Retorno (ROAS)</div>
+                        <div class="kpi-value" id="val-roas">0x</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Margem Líquida</div>
+                        <div class="kpi-value" id="val-margin">0%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">CPM</div>
+                        <div class="kpi-value" id="val-cpm">R$ 0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Custo por Venda</div>
+                        <div class="kpi-value" id="val-cpa">R$ 0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Custo por Clique</div>
+                        <div class="kpi-value" id="val-cpc">R$ 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD: FUNIL VISUAL -->
+            <div class="card">
+                <h2 class="card-title">Funil Etapa por Etapa</h2>
+                <div class="funnel" id="funnel-visual">
+
+                    <div class="funnel-stage">
+                        <div class="funnel-bar-wrapper">
+                            <div class="funnel-bar bar-impressions" id="bar-imp" style="width:100%">
+                                <span class="funnel-label">Impressões</span>
+                                <span class="funnel-count" id="f-imp">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="funnel-arrow">
+                        <div class="funnel-arrow-line"></div>
+                        <span class="funnel-rate-badge" id="rate-ctr">▼ 0% CTR</span>
+                        <div class="funnel-arrow-line"></div>
+                    </div>
+
+                    <div class="funnel-stage">
+                        <div class="funnel-bar-wrapper">
+                            <div class="funnel-bar bar-clicks" id="bar-clicks" style="width:60%">
+                                <span class="funnel-label">Cliques</span>
+                                <span class="funnel-count" id="f-clicks">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="funnel-arrow">
+                        <div class="funnel-arrow-line"></div>
+                        <span class="funnel-rate-badge" id="rate-load">▼ 0% Carregamento</span>
+                        <div class="funnel-arrow-line"></div>
+                    </div>
+
+                    <div class="funnel-stage">
+                        <div class="funnel-bar-wrapper">
+                            <div class="funnel-bar bar-pageviews" id="bar-pageviews" style="width:50%">
+                                <span class="funnel-label">Page Views</span>
+                                <span class="funnel-count" id="f-pageviews">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="funnel-arrow">
+                        <div class="funnel-arrow-line"></div>
+                        <span class="funnel-rate-badge" id="rate-page">▼ 0% Conv. Página</span>
+                        <div class="funnel-arrow-line"></div>
+                    </div>
+
+                    <div class="funnel-stage">
+                        <div class="funnel-bar-wrapper">
+                            <div class="funnel-bar bar-checkouts" id="bar-checkouts" style="width:35%">
+                                <span class="funnel-label">Checkouts</span>
+                                <span class="funnel-count" id="f-checkouts">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="funnel-arrow">
+                        <div class="funnel-arrow-line"></div>
+                        <span class="funnel-rate-badge" id="rate-check">▼ 0% Conv. Checkout</span>
+                        <div class="funnel-arrow-line"></div>
+                    </div>
+
+                    <div class="funnel-stage">
+                        <div class="funnel-bar-wrapper">
+                            <div class="funnel-bar bar-sales" id="bar-sales" style="width:18%">
+                                <span class="funnel-label">Vendas</span>
+                                <span class="funnel-count" id="f-sales">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD: AUDITORIA -->
+            <div class="card">
+                <h2 class="card-title">Auditoria de Conversão</h2>
+                <div class="alerts-wrapper">
+
+                    <div class="alert-box" id="box-ads">
+                        <div class="alert-icon">📢</div>
+                        <div class="alert-content">
+                            <h4>1. Qualidade do Anúncio <span class="metric-tag" id="tag-ctr">0% CTR</span></h4>
+                            <p id="msg-ads">Aguardando inserção de dados...</p>
+                        </div>
+                    </div>
+
+                    <div class="alert-box" id="box-load">
+                        <div class="alert-icon">⚡</div>
+                        <div class="alert-content">
+                            <h4>2. Carregamento da Página <span class="metric-tag" id="tag-load">0% Taxa</span></h4>
+                            <p id="msg-load">Aguardando inserção de dados...</p>
+                        </div>
+                    </div>
+
+                    <div class="alert-box" id="box-page">
+                        <div class="alert-icon">🖱️</div>
+                        <div class="alert-content">
+                            <h4>3. Poder da Página <span class="metric-tag" id="tag-page">0% Conv.</span></h4>
+                            <p id="msg-page">Aguardando inserção de dados...</p>
+                        </div>
+                    </div>
+
+                    <div class="alert-box" id="box-checkout">
+                        <div class="alert-icon">🛒</div>
+                        <div class="alert-content">
+                            <h4>4. Fricção no Pagamento <span class="metric-tag" id="tag-check">0% Conv.</span></h4>
+                            <p id="msg-checkout">Aguardando inserção de dados...</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- VEREDITO -->
+            <div class="scale-box" id="box-scale">
+                <div class="scale-title">Veredito da Inteligência</div>
+                <div class="scale-message" id="msg-scale">Insira todos os dados do funil para liberar a análise de escala.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p style="color: #ffffff; font-size: 0.95rem; font-weight: 800; letter-spacing: 1px; margin-top: 8px; text-transform: uppercase;">Decifre o Funil. Escale o Algoritmo.</p>
+        <button onclick="handleLogout()" style="margin-top: 20px; background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem;">Sair da Conta</button>
+    </footer>
+
+</div>
+
+<script>
+    // ==========================================
+    // CONFIGURAÇÃO SUPABASE & SEGURANÇA
+    // ==========================================
+    const SUPABASE_URL = "https://dclwipihgyevdmohsnsd.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_SZ1qn1uzYjfSffyHLnQTig_1JTg8j26";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function checkAccess() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        
+        if (!session) {
+            window.location.href = 'access.html';
+            return;
+        }
+
+        // Verificar status na tabela customizada
+        const { data: profile, error } = await _supabase
+            .from('roi_saas_users')
+            .select('subscription_status')
+            .eq('id', session.user.id)
+            .single();
+
+        if (error || !profile || profile.subscription_status !== 'active') {
+            // Se não estiver ativo, mostra um overlay de bloqueio (opcional) ou redireciona
+            // Para ser mais direto, vamos redirecionar para a página de compra
+            alert('Assinatura Inativa ou Pendente. Redirecionando para o Vault...');
+            window.location.href = 'access.html';
+        }
+    }
+
+    async function handleLogout() {
+        await _supabase.auth.signOut();
+        window.location.href = 'access.html';
+    }
+
+    // Executar trava imediatamente
+    checkAccess();
+
+    // ==========================================
+    // BENCHMARKS — INFOPRODUTO
+    // ==========================================
+    const BENCH = {
+        ctr:      { yellow: 1.2, green: 2.0 },
+        loadRate: { yellow: 65,  green: 80  },
+        pageConv: { yellow: 8,   green: 15  },
+        checkConv:{ yellow: 15,  green: 30  }
+    };
+
+    // ==========================================
+    // DIAGNÓSTICOS — INFOPRODUTO
+    // ==========================================
+    const DIAG = {
+        ads: {
+            danger:  "Hook fraco. Teste criativos com prova social, depoimentos em vídeo curtos (15-30s) ou promessas de transformação específica. Carrosséis e UGC costumam performar melhor para infoprodutos.",
+            warning: "CTR aceitável, mas há espaço. Teste variações de headline, thumbnails e ângulos de copy. Storytelling e bastidores do criador tendem a qualificar melhor o clique.",
+            success: "Criativo acima da média do mercado de infoprodutos. Mantenha o ângulo vencedor e crie variações do mesmo conceito para escalar sem fadiga."
+        },
+        load: {
+            danger:  "Muitos cliques não viram visitas reais. Causas: (1) Página demorando mais de 3s pra carregar (2) Domínio sem SSL (3) Página pesada com vídeos autoplay (4) Redirect quebrado. Teste com PageSpeed Insights.",
+            warning: "Carregamento razoável, mas perdendo tráfego pago na transição. Otimize imagens, ative cache do servidor e teste com 3G lento.",
+            success: "Carregamento excelente. A maioria dos cliques se converte em visitas reais. Infraestrutura da página saudável."
+        },
+        page: {
+            danger:  "Página não convence. Checklist: (1) Headline promete transformação clara? (2) VSL acima da dobra? (3) Depoimentos reais visíveis? (4) Carregamento < 3s? (5) Escassez ou urgência presente?",
+            warning: "Conversão razoável. Para subir: adicione prints de resultados de alunos, um botão flutuante de CTA, e teste cores do botão de compra. Ancoragem de preço ajuda muito.",
+            success: "Página convertendo como máquina. Copy e estrutura estão excelentes. Foque em escalar tráfego mantendo essa estrutura intacta."
+        },
+        checkout: {
+            danger:  "Muita desistência no pagamento. Causas comuns em infoprodutos: (1) Preço surpresa (2) Falta de selos de segurança (3) Pix sem desconto atrativo (4) Order bump confuso (5) Checkout lento ou poluído.",
+            warning: "Checkout aceitável. Para otimizar: ofereça desconto de 5-10% no Pix, adicione garantia visível no checkout, e ative recuperação de boleto/Pix por WhatsApp em até 30 min.",
+            success: "Checkout com baixa fricção. Fluxo saudável. Se tiver order bump, teste ofertas complementares para aumentar ticket médio por transação."
+        }
+    };
+
+    // ==========================================
+    // DOM REFS
+    // ==========================================
+    const $ = id => document.getElementById(id);
+
+    const inputs = {
+        spend: $('spend'), impressions: $('impressions'), clicks: $('clicks'),
+        pageviews: $('pageviews'), checkouts: $('checkouts'), sales: $('sales'), ticket: $('ticket'),
+        fee: $('platform-fee')
+    };
+
+    const kpis = {
+        profit: $('val-profit'), revenue: $('val-revenue'), roas: $('val-roas'),
+        margin: $('val-margin'), cpm: $('val-cpm'), cpa: $('val-cpa'), cpc: $('val-cpc')
+    };
+
+    const funnel = {
+        barImp: $('bar-imp'), barClicks: $('bar-clicks'),
+        barPageviews: $('bar-pageviews'), barCheckouts: $('bar-checkouts'), barSales: $('bar-sales'),
+        fImp: $('f-imp'), fClicks: $('f-clicks'),
+        fPageviews: $('f-pageviews'), fCheckouts: $('f-checkouts'), fSales: $('f-sales'),
+        rateCtr: $('rate-ctr'), rateLoad: $('rate-load'), ratePage: $('rate-page'), rateCheck: $('rate-check')
+    };
+
+    const alerts = {
+        tagCtr: $('tag-ctr'), msgAds: $('msg-ads'), boxAds: $('box-ads'),
+        tagLoad: $('tag-load'), msgLoad: $('msg-load'), boxLoad: $('box-load'),
+        tagPage: $('tag-page'), msgPage: $('msg-page'), boxPage: $('box-page'),
+        tagCheck: $('tag-check'), msgCheck: $('msg-checkout'), boxCheck: $('box-checkout')
+    };
+
+    const scaleBox = $('box-scale'), scaleMsg = $('msg-scale');
+
+    // ==========================================
+    // HELPERS
+    // ==========================================
+    function money(v) {
+        return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function fmt(v) { return v.toLocaleString('pt-BR'); }
+
+    function statusClass(val, bench) {
+        if (val < bench.yellow) return 'danger';
+        if (val < bench.green) return 'warning';
+        return 'success';
+    }
+
+    // ==========================================
+    // STORED STATE
+    // ==========================================
+    let state = { spend: 0, imp: 0, clicks: 0, checkouts: 0, sales: 0, ticket: 0, fee: 0, profit: 0 };
+
+    // ==========================================
+    // MAIN CALCULATE
+    // ==========================================
+    function calculate() {
+        const spend = parseFloat(inputs.spend.value) || 0;
+        const imp   = parseFloat(inputs.impressions.value) || 0;
+        const clicks = parseFloat(inputs.clicks.value) || 0;
+        const pageviews = parseFloat(inputs.pageviews.value) || 0;
+        const checkouts = parseFloat(inputs.checkouts.value) || 0;
+        const sales = parseFloat(inputs.sales.value) || 0;
+        const ticket = parseFloat(inputs.ticket.value) || 0;
+        const fee   = parseFloat(inputs.fee.value) || 0;
+
+        // Math
+        const revenueBruto = sales * ticket;
+        const feeAmount = revenueBruto * (fee / 100);
+        const profit = revenueBruto - feeAmount - spend;
+
+        const roas = spend > 0 ? revenueBruto / spend : 0;
+        const margin = revenueBruto > 0 ? (profit / revenueBruto) * 100 : 0;
+        const cpm = imp > 0 ? (spend / imp) * 1000 : 0;
+        const ctr = imp > 0 ? (clicks / imp) * 100 : 0;
+        const loadRate = clicks > 0 ? (pageviews / clicks) * 100 : 0;
+        const pageConv = pageviews > 0 ? (checkouts / pageviews) * 100 : 0;
+        const checkConv = checkouts > 0 ? (sales / checkouts) * 100 : 0;
+
+        // Save state
+        state = { spend, imp, clicks, pageviews, checkouts, sales, ticket, fee, profit };
+
+        // ---- KPIs ----
+        kpis.revenue.innerText = money(revenueBruto);
+        kpis.profit.innerText = money(profit);
+        kpis.profit.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+        kpis.roas.innerText = roas.toFixed(2) + 'x';
+        kpis.margin.innerText = parseFloat(margin.toFixed(1)) + '%';
+        kpis.margin.style.color = margin > 0 ? 'var(--success)' : margin < 0 ? 'var(--danger)' : 'var(--text-main)';
+        kpis.cpm.innerText = money(cpm);
+        kpis.cpa.innerText = money(sales > 0 ? spend / sales : 0);
+        kpis.cpc.innerText = money(clicks > 0 ? spend / clicks : 0);
+
+        // ---- FUNIL VISUAL ----
+        funnel.fImp.innerText = fmt(imp);
+        funnel.fClicks.innerText = fmt(clicks);
+        funnel.fPageviews.innerText = fmt(pageviews);
+        funnel.fCheckouts.innerText = fmt(checkouts);
+        funnel.fSales.innerText = fmt(sales);
+
+        // Widths
+        const w1 = 100;
+        const w2 = imp > 0 ? Math.max(18, w1 * mapVisual(ctr)) : 60;
+        const w2b = clicks > 0 ? Math.max(16, w2 * mapVisual(loadRate)) : 50;
+        const w3 = pageviews > 0 ? Math.max(14, w2b * mapVisual(pageConv)) : 35;
+        const w4 = checkouts > 0 ? Math.max(10, w3 * mapVisual(checkConv)) : 18;
+
+        funnel.barImp.style.width = w1 + '%';
+        funnel.barClicks.style.width = w2 + '%';
+        funnel.barPageviews.style.width = w2b + '%';
+        funnel.barCheckouts.style.width = w3 + '%';
+        funnel.barSales.style.width = w4 + '%';
+
+        // Rate badges
+        const ctrS = statusClass(ctr, BENCH.ctr);
+        const loadS = statusClass(loadRate, BENCH.loadRate);
+        const pageS = statusClass(pageConv, BENCH.pageConv);
+        const checkS = statusClass(checkConv, BENCH.checkConv);
+
+        funnel.rateCtr.innerText = '▼ ' + parseFloat(ctr.toFixed(1)) + '% CTR';
+        funnel.rateCtr.className = 'funnel-rate-badge' + (imp > 0 ? ' rate-' + ctrS : '');
+
+        funnel.rateLoad.innerText = '▼ ' + parseFloat(loadRate.toFixed(1)) + '% Carreg.';
+        funnel.rateLoad.className = 'funnel-rate-badge' + (clicks > 0 ? ' rate-' + loadS : '');
+
+        funnel.ratePage.innerText = '▼ ' + parseFloat(pageConv.toFixed(1)) + '% Conv. Página';
+        funnel.ratePage.className = 'funnel-rate-badge' + (pageviews > 0 ? ' rate-' + pageS : '');
+
+        funnel.rateCheck.innerText = '▼ ' + parseFloat(checkConv.toFixed(1)) + '% Conv. Checkout';
+        funnel.rateCheck.className = 'funnel-rate-badge' + (checkouts > 0 ? ' rate-' + checkS : '');
+
+        // ---- ALERTAS ----
+        alerts.tagCtr.innerText = parseFloat(ctr.toFixed(1)) + '% CTR';
+        alerts.tagLoad.innerText = parseFloat(loadRate.toFixed(1)) + '% Taxa';
+        alerts.tagPage.innerText = parseFloat(pageConv.toFixed(1)) + '% Conv.';
+        alerts.tagCheck.innerText = parseFloat(checkConv.toFixed(1)) + '% Conv.';
+
+        // Ads
+        if (imp === 0) {
+            alerts.boxAds.className = 'alert-box'; alerts.msgAds.innerText = 'Aguardando dados.';
+        } else {
+            alerts.boxAds.className = 'alert-box status-' + ctrS;
+            alerts.msgAds.innerText = DIAG.ads[ctrS === 'danger' ? 'danger' : ctrS === 'warning' ? 'warning' : 'success'];
+        }
+
+        // Load
+        if (clicks === 0) {
+            alerts.boxLoad.className = 'alert-box'; alerts.msgLoad.innerText = 'Aguardando dados.';
+        } else {
+            alerts.boxLoad.className = 'alert-box status-' + loadS;
+            alerts.msgLoad.innerText = DIAG.load[loadS === 'danger' ? 'danger' : loadS === 'warning' ? 'warning' : 'success'];
+        }
+
+        // Page
+        if (pageviews === 0) {
+            alerts.boxPage.className = 'alert-box'; alerts.msgPage.innerText = 'Aguardando dados.';
+        } else {
+            alerts.boxPage.className = 'alert-box status-' + pageS;
+            alerts.msgPage.innerText = DIAG.page[pageS === 'danger' ? 'danger' : pageS === 'warning' ? 'warning' : 'success'];
+        }
+
+        // Checkout
+        if (checkouts === 0) {
+            alerts.boxCheck.className = 'alert-box'; alerts.msgCheck.innerText = 'Aguardando dados.';
+        } else {
+            alerts.boxCheck.className = 'alert-box status-' + checkS;
+            alerts.msgCheck.innerText = DIAG.checkout[checkS === 'danger' ? 'danger' : checkS === 'warning' ? 'warning' : 'success'];
+        }
+
+        // ---- VEREDITO ----
+        if (imp === 0 || clicks === 0 || pageviews === 0 || checkouts === 0 || sales === 0) {
+            scaleBox.style.borderColor = 'var(--card-border)';
+            scaleBox.style.background = 'var(--card-bg)';
+            scaleMsg.innerText = 'Insira todos os dados do funil para recomendações.';
+            scaleMsg.style.color = 'var(--text-muted)';
+        } else if (profit < 0 || ctrS === 'danger' || loadS === 'danger' || pageS === 'danger' || checkS === 'danger') {
+            scaleBox.style.borderColor = 'var(--danger)';
+            scaleBox.style.background = 'rgba(239, 68, 68, 0.1)';
+            scaleMsg.innerText = '⛔ NÃO ESCALAR O TRÁFEGO. Conserte os gargalos vermelhos primeiro.';
+            scaleMsg.style.color = '#ffb3b3';
+        } else if (ctrS === 'warning' || loadS === 'warning' || pageS === 'warning' || checkS === 'warning') {
+            scaleBox.style.borderColor = 'var(--warning)';
+            scaleBox.style.background = 'rgba(245, 158, 11, 0.1)';
+            scaleMsg.innerText = '⚠️ ESCALAR COM CAUTELA. Aumente verba em blocos de 20% e monitore o CPA diariamente.';
+            scaleMsg.style.color = '#ffe0a3';
+        } else {
+            scaleBox.style.borderColor = 'var(--success)';
+            scaleBox.style.background = 'rgba(16, 185, 129, 0.1)';
+            scaleMsg.innerText = '🔥 LIBERADO PARA ESCALAR. Funil verde em todas as etapas. Acelere o orçamento com confiança.';
+            scaleMsg.style.color = '#a3ffe0';
+        }
+        // Update complete
+    }
+
+    // ==========================================
+    // FUNNEL VISUAL WIDTH MAPPING
+    // ==========================================
+    function mapVisual(rate) {
+        if (rate <= 0) return 0.35;
+        if (rate >= 50) return 0.92;
+        return 0.35 + (Math.min(rate, 50) / 50) * 0.57;
+    }
+
+    // ==========================================
+    // EVENT LISTENERS
+    // ==========================================
+    ['spend', 'impressions', 'clicks', 'pageviews', 'checkouts', 'sales', 'ticket', 'platform-fee'].forEach(
+        id => $(id).addEventListener('input', calculate)
+    );
+
+    window.addEventListener('load', calculate);
+</script>
+
+</body>
+</html>
