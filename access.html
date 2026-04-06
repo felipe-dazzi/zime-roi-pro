@@ -204,14 +204,9 @@
                 <input type="password" id="signup-password" placeholder="Mínimo 6 caracteres">
             </div>
 
-            <div id="pricing-box" class="pricing-info">
+            <div class="pricing-info">
                 <div class="price-val">R$ 19,90 <span>/ MÊS</span></div>
                 <div class="price-desc">Cancele quando quiser</div>
-            </div>
-
-            <div id="team-info" class="pricing-info" style="display: none; border-color: var(--accent-primary); background: rgba(0, 136, 255, 0.08);">
-                <div class="price-val" style="color: var(--accent-primary);">ACESSO DE TIME</div>
-                <div class="price-desc" style="color: var(--accent-primary);">Convite VIP Detectado</div>
             </div>
 
             <button class="btn btn-gold" id="signup-btn" onclick="handleSignup()">CONCORDAR E ASSINAR</button>
@@ -228,15 +223,19 @@
     const SUPABASE_KEY = "sb_publishable_SZ1qn1uzYjfSffyHLnQTig_1JTg8j26";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Detectar convite de time na carga
-    const urlParams = new URLSearchParams(window.location.search);
-    const teamCode = urlParams.get('team');
-    
-    if (teamCode === 'ZIME5') {
-        document.getElementById('pricing-box').style.display = 'none';
-        document.getElementById('team-info').style.display = 'block';
-        document.getElementById('signup-btn').innerText = 'ATIVAR ACESSO DE TIME';
-        switchTab('signup'); // Abre no cadastro se tiver o link
+    function switchTab(type) {
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const btnLogin = document.getElementById('btn-login');
+        const btnSignup = document.getElementById('btn-signup');
+
+        if(type === 'login') {
+            loginForm.classList.add('active'); signupForm.classList.remove('active');
+            btnLogin.classList.add('active'); btnSignup.classList.remove('active');
+        } else {
+            loginForm.classList.remove('active'); signupForm.classList.add('active');
+            btnLogin.classList.remove('active'); btnSignup.classList.add('active');
+        }
     }
 
     async function handleLogin() {
@@ -276,11 +275,7 @@
             email,
             password,
             options: {
-                data: { 
-                    full_name: name, 
-                    whatsapp: whatsapp,
-                    team_invite: teamCode 
-                }
+                data: { full_name: name, whatsapp: whatsapp }
             }
         });
 
@@ -289,29 +284,9 @@
             btn.disabled = false;
             btn.innerText = 'CONCORDAR E ASSINAR';
         } else {
-            if (teamCode === 'ZIME5') {
-                btn.innerText = 'VALIDANDO ACESSO...';
-                // Pequena espera para o trigger do banco processar
-                setTimeout(async () => {
-                    const { data: profile } = await _supabase
-                        .from('roi_saas_users')
-                        .select('subscription_status')
-                        .eq('id', data.user.id)
-                        .single();
-
-                    if (profile && profile.subscription_status === 'active') {
-                        alert('Bem-vindo ao Time Zime! Acesso PRO liberado.');
-                        window.location.href = 'index.html';
-                    } else {
-                        alert('Limite de convites atingido ou código inválido. Redirecionando para checkout...');
-                        window.location.href = "https://pay.kiwify.com.br/PparN3T";
-                    }
-                }, 2000);
-            } else {
-                // URL oficial da Kiwify integrada
-                const CHECKOUT_URL = "https://pay.kiwify.com.br/PparN3T"; 
-                window.location.href = CHECKOUT_URL;
-            }
+            // URL oficial da Kiwify integrada
+            const CHECKOUT_URL = "https://pay.kiwify.com.br/PparN3T"; 
+            window.location.href = CHECKOUT_URL;
         }
     }
 </script>
