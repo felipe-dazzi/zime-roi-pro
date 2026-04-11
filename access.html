@@ -271,22 +271,19 @@
         btn.disabled = true;
         btn.innerText = 'PROCESSANDO...';
 
-        const { data, error } = await _supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: { full_name: name, whatsapp: whatsapp }
-            }
-        });
+        // SALVAR COMO LEAD (Opção 1)
+        // Usamos upsert para que se o cliente tentar de novo, apenas atualize os dados/senha
+        const { error } = await _supabase
+            .from('roi_pro_leads')
+            .upsert({ 
+                full_name: name, 
+                email: email, 
+                whatsapp: whatsapp, 
+                password_temp: password 
+            }, { onConflict: 'email' });
 
         if (error) {
-            if (error.message.includes('already registered')) {
-                alert('Você já possui uma conta no ecossistema Zime! Redirecionando para o login...');
-                switchTab('login');
-                document.getElementById('login-email').value = email;
-            } else {
-                alert('Erro no cadastro: ' + error.message);
-            }
+            alert('Erro ao processar cadastro: ' + error.message);
             btn.disabled = false;
             btn.innerText = 'CONCORDAR E ASSINAR';
         } else {
@@ -294,7 +291,6 @@
             const CHECKOUT_URL = "https://pay.kiwify.com.br/PparN3T"; 
             
             const cleanPhone = whatsapp.replace(/\D/g, '');
-            // Removido o prefixo 55 para evitar repetição, mantendo apenas DDD + Número
             const finalPhone = cleanPhone;
 
             const params = new URLSearchParams({
@@ -304,10 +300,19 @@
             });
 
             const finalURL = `${CHECKOUT_URL}/?${params.toString()}`;
-            console.log("Redirecionando para Kiwify (sem prefixo repetido):", finalURL);
+            console.log("Lead capturado. Redirecionando para Kiwify:", finalURL);
             window.location.href = finalURL;
         }
     }
+
+    // RESETAR BOTÃO AO VOLTAR DO NAVEGADOR (bfcache fix)
+    window.addEventListener('pageshow', (event) => {
+        const btn = document.getElementById('signup-btn');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = 'CONCORDAR E ASSINAR';
+        }
+    });
 </script>
 
 </body>
