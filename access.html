@@ -294,8 +294,8 @@
             const CHECKOUT_URL = "https://pay.kiwify.com.br/PparN3T"; 
             
             const cleanPhone = whatsapp.replace(/\D/g, '');
-            // Adiciona o prefixo 55 se o número tiver apenas DDD + Número (10 ou 11 dígitos)
-            const finalPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
+            // Removido o prefixo 55 para evitar repetição, mantendo apenas DDD + Número
+            const finalPhone = cleanPhone;
 
             const params = new URLSearchParams({
                 name: name,
@@ -304,7 +304,7 @@
             });
 
             const finalURL = `${CHECKOUT_URL}/?${params.toString()}`;
-            console.log("Redirecionando para Kiwify:", finalURL);
+            console.log("Redirecionando para Kiwify (sem prefixo repetido):", finalURL);
             window.location.href = finalURL;
         }
     }
