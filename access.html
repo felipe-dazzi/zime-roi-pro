@@ -290,9 +290,22 @@
             btn.disabled = false;
             btn.innerText = 'CONCORDAR E ASSINAR';
         } else {
-            // URL oficial da Kiwify integrada
+            // URL oficial da Kiwify integrada com preenchimento automático robusto
             const CHECKOUT_URL = "https://pay.kiwify.com.br/PparN3T"; 
-            window.location.href = CHECKOUT_URL;
+            
+            const cleanPhone = whatsapp.replace(/\D/g, '');
+            // Adiciona o prefixo 55 se o número tiver apenas DDD + Número (10 ou 11 dígitos)
+            const finalPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
+
+            const params = new URLSearchParams({
+                name: name,
+                email: email,
+                phone: finalPhone
+            });
+
+            const finalURL = `${CHECKOUT_URL}/?${params.toString()}`;
+            console.log("Redirecionando para Kiwify:", finalURL);
+            window.location.href = finalURL;
         }
     }
 </script>
