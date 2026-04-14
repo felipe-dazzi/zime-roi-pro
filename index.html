@@ -726,11 +726,18 @@
     const SUPABASE_KEY = "sb_publishable_SZ1qn1uzYjfSffyHLnQTig_1JTg8j26";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    const OWNER_EMAILS = ['felipe@zime.digital'];
+
     async function checkAccess() {
         const { data: { session } } = await _supabase.auth.getSession();
-        
+
         if (!session) {
             window.location.href = 'access.html';
+            return;
+        }
+
+        // Acesso irrestrito para o dono do sistema
+        if (OWNER_EMAILS.includes(session.user.email)) {
             return;
         }
 
@@ -742,8 +749,6 @@
             .single();
 
         if (error || !profile || profile.subscription_status !== 'active') {
-            // Se não estiver ativo, mostra um overlay de bloqueio (opcional) ou redireciona
-            // Para ser mais direto, vamos redirecionar para a página de compra
             alert('Assinatura Inativa ou Pendente. Redirecionando para o Vault...');
             window.location.href = 'access.html';
         }
